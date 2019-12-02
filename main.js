@@ -43,6 +43,7 @@ class Airport {
         }
         ctx.stroke();
         for (let i = 0; i < len; i++) {
+            ctx.save();
             ctx.fillStyle = "#ffffff";
             ctx.font = "15px arial";
             ctx.textBaseline = "middle";

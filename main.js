@@ -65,7 +65,7 @@ class Airport {
         ctx.beginPath();
         ctx.strokeStyle = taxiwayMatColor;
         ctx.lineWidth = 40;
-        for (i = 0; i < len; i++) {
+        for (let i = 0; i < len; i++) {
         	  ctx.moveTo(this.taxiways[i][1], this.taxiways[i][2]);
             ctx.lineTo(this.taxiways[i][3], this.taxiways[i][4]);
         }
@@ -73,7 +73,7 @@ class Airport {
         ctx.beginPath();
         ctx.strokeStyle = "#000000";
         ctx.lineWidth = 6;
-        for (i = 0; i < len; i++) {
+        for (let i = 0; i < len; i++) {
         		ctx.moveTo(this.taxiways[i][1], this.taxiways[i][2]);
             ctx.lineTo(this.taxiways[i][3], this.taxiways[i][4]);
         }
@@ -81,7 +81,7 @@ class Airport {
         ctx.beginPath();
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 2;
-        for (i = 0; i < len; i++) {
+        for (let i = 0; i < len; i++) {
         		ctx.moveTo(this.taxiways[i][1], this.taxiways[i][2]);
             ctx.lineTo(this.taxiways[i][3], this.taxiways[i][4]);
         }

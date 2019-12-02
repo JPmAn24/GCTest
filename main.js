@@ -1,17 +1,17 @@
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
-var taxiwayMatColor = "rgba(18, 18, 106, 0.75)"
-drawAirport();
+var taxiwayMatColor = "rgba(18, 18, 106, 1)"
 
 function drawAirport() {
-    drawTaxiway(ctx, 100, 100, 200, 400, 20, "A2");
+    drawTaxiway(ctx, 100, 100, 100, 400, 20, "A1");
+    drawTaxiway(ctx, 50, 300, 150, 300, 20, "A2");
 }
 
-function drawTaxiway(ctx, sX, sY, eX, eY, rad, name) {
+function drawTaxiway(ctx, sX, sY, eX, eY, name) {
     ctx.save();
     ctx.beginPath();
     ctx.strokeStyle = taxiwayMatColor;
-    ctx.lineWidth = rad * 2;
+    ctx.lineWidth = 40;
     ctx.moveTo(sX,sY);
     ctx.lineTo(eX,eY);
     ctx.stroke();
@@ -46,3 +46,51 @@ function drawTaxiway(ctx, sX, sY, eX, eY, rad, name) {
     ctx.fillText(name, 0, ofs);
     ctx.restore();
 }
+
+class Airport {
+		constructor(ctx, icao) {
+    		this.ctx = ctx;
+        this.icao = icao;
+        this.taxiways = new Array();
+    }
+    addTaxiway(name, sX, sY, eX, eY) {
+    		var taxiway = new Array(name, sX, sY, eX, eY);
+        var len = this.taxiways.length;
+        this.taxiways[len] = taxiway;
+    }
+    drawTaxiways() {
+    		var ctx = this.ctx
+    		var len = this.taxiways.length;
+        ctx.save();
+        ctx.beginPath();
+        ctx.strokeStyle = taxiwayMatColor;
+        ctx.lineWidth = 40;
+        for (i = 0; i < len; i++) {
+        	  ctx.moveTo(this.taxiways[i][1], this.taxiways[i][2]);
+            ctx.lineTo(this.taxiways[i][3], this.taxiways[i][4]);
+        }
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 6;
+        for (i = 0; i < len; i++) {
+        		ctx.moveTo(this.taxiways[i][1], this.taxiways[i][2]);
+            ctx.lineTo(this.taxiways[i][3], this.taxiways[i][4]);
+        }
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        for (i = 0; i < len; i++) {
+        		ctx.moveTo(this.taxiways[i][1], this.taxiways[i][2]);
+            ctx.lineTo(this.taxiways[i][3], this.taxiways[i][4]);
+        }
+        ctx.stroke();
+        ctx.restore();
+    }
+}
+
+kdca = new Airport(ctx, "KDCA");
+kdca.addTaxiway("A1", 100, 100, 100, 400);
+kdca.addTaxiway("A2", 50, 300, 150, 300);
+kdca.drawTaxiways();

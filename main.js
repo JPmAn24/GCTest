@@ -9,8 +9,7 @@ class Airport {
         var taxiways = [];
         this.taxiways = taxiways;
     }
-    addTaxiway(name) {
-        var taxiway = new Taxiway(name);
+    addTaxiway(taxiway) {
         var len = this.taxiways.length;
         this.taxiways[len] = taxiway;
     }
@@ -51,29 +50,32 @@ class Airport {
             }
         }
         ctx.stroke();
-        // for (let i = 0; i < len; i++) {
-        //     ctx.save();
-        //     ctx.fillStyle = "#ffffff";
-        //     ctx.font = "15px arial";
-        //     ctx.textBaseline = "middle";
-        //     ctx.textAlign = "center";
-        //     let posX = (this.taxiways[i][1] + this.taxiways[i][3]) / 2;
-        //     let posY = (this.taxiways[i][2] + this.taxiways[i][4]) / 2;
-        //     let dx = this.taxiways[i][3] - this.taxiways[i][1];
-        //     let dy = this.taxiways[i][4] - this.taxiways[i][2];
-        //     let ofs = -8;
-        //     let rot = Math.atan(dy/dx);
-        //     if ((rot > (Math.PI / 2)) && (rot < (3 * (Math.PI / 2)))) {
-        //         rot -= Math.PI;
-        //         ofs *= -1;
-        //     }
-        //     ctx.translate(posX, posY);
-        //     if (rot != 0) {
-        //         ctx.rotate(rot);
-        //     }
-        //     ctx.fillText(this.taxiways[i][0], 0, ofs);
-        //     ctx.restore();
-        // }
+        for (let i = 0; i < len; i++) {
+            let len1 = this.taxiways[i].segments.length;
+            for (let j = 0; j < len1; j++) {
+                if (this.taxiways[i].segments[j].label == true) {
+                    ctx.save();
+                    ctx.fillStyle = "#ffffff";
+                    ctx.font = "15px arial";
+                    ctx.textBaseline = "middle";
+                    ctx.textAlign = "center";
+                    let posX = (this.taxiways[i].segments[j].sPos[0] + this.taxiways[i].segments[j].sPos[1]) / 2;
+                    let posY = (this.taxiways[i].segments[j].ePos[0] + this.taxiways[i].segments[j].ePos[1]) / 2;
+                    let dx = this.taxiways[i].segments[j].sPos[0] - this.taxiways[i].segments[j].ePos[0];
+                    let dy = this.taxiways[i].segments[j].sPos[1] - this.taxiways[i].segments[j].ePos[1];
+                    let ofs = -8;
+                    let rot = Math.atan(dy/dx);
+                    if ((rot > (Math.PI / 2)) && (rot < (3 * (Math.PI / 2)))) {
+                        rot -= Math.PI;
+                        ofs *= -1;
+                    }
+                    ctx.translate(posX, posY);
+                    ctx.rotate(rot);
+                    ctx.fillText(this.taxiways[i].name, 0, ofs);
+                    ctx.restore();
+                }
+            }
+        }
     }
 }
 
@@ -99,6 +101,8 @@ class Segment {
 }
 
 kdca = new Airport(ctx, "KDCA");
-kdca.addTaxiway("A");
-kdca.taxiways[0].addSegment([100, 100], [100, 400], false);
+A1 = new Taxiway("A1");
+A1.addSegment([100, 100], [100, 400], true);
+A1.addSegment([100, 400], [400, 400], true);
+kdca.addTaxiway(A1);
 kdca.drawTaxiways();

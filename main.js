@@ -1,6 +1,37 @@
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 var taxiwayMatColor = "rgba(18, 18, 106, 1)"
+var svgCircle = '<svg height="100" width="100"><circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" /></svg>';
+
+drawCanvas = () => {
+	kdca.drawTaxiways();
+	ap1.updatePosition();
+	ap1.drawAirplane();
+}
+
+class Airplane {
+	constructor(ctx, name, icao, position) {
+		this.ctx = ctx;
+		this.name = name;
+		this.icao = icao;
+		this.position = position;
+		this.speed = 0;
+		this.heading = 0;
+		this.turn = 0;
+	}
+	updatePosition() {
+		nPosX = speed * (3600 / 50) * Math.sin((Math.PI / 180) * this.heading);
+		nPosY = speed * (3600 / 50) * Math.cos((Math.PI / 180) * this.heading);
+		this.position = [nPosX, nPosY];
+	}
+	drawAirplane() {
+		var ctx = this.ctx;
+		ctx.save();
+		ctx.translate((-1 * this.position[0]), (-1 * this.position[1]));
+		ctx.drawImage(svgCircle, 0, 0);
+		ctx.restore();
+	}
+}
 
 class Airport {
 	constructor(ctx, icao) {
@@ -103,6 +134,11 @@ class Segment {
 kdca = new Airport(ctx, "KDCA");
 A1 = new Taxiway("A1");
 A1.addSegment([100, 100], [100, 400], true);
-A1.addSegment([100, 400], [400, 400], true);
+A1.addSegment([100, 400], [400, 400], false);
+A1.addSegment([400, 400], [400, 100], true);
 kdca.addTaxiway(A1);
 kdca.drawTaxiways();
+
+ap1 = new Airplane(ctx, "B737", "B737", [100, 100]);
+ap1.speed = 20;
+ap1.heading = 100;

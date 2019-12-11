@@ -1,9 +1,11 @@
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
-var taxiwayMatColor = "rgba(18, 18, 106, 1)"
-var svgCircle = '<svg height="100" width="100"><circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" /></svg>';
+var width = canvas.width;
+var height = canvas.height;
+var taxiwayMatColor = "rgba(18, 18, 106, 1)";
 
 drawCanvas = () => {
+    ctx.clearRect(0, 0, width, height);
 	kdca.drawTaxiways();
 	ap1.updatePosition();
 	ap1.drawAirplane();
@@ -20,15 +22,18 @@ class Airplane {
 		this.turn = 0;
 	}
 	updatePosition() {
-		nPosX = speed * (3600 / 50) * Math.sin((Math.PI / 180) * this.heading);
-		nPosY = speed * (3600 / 50) * Math.cos((Math.PI / 180) * this.heading);
+		let nPosX = this.position[0] + this.speed * Math.cos(-1 * ((Math.PI / 180) * this.heading) + (Math.PI / 2));
+		let nPosY = this.position[1] - this.speed * Math.sin(-1 * ((Math.PI / 180) * this.heading) + (Math.PI / 2));
 		this.position = [nPosX, nPosY];
 	}
 	drawAirplane() {
 		var ctx = this.ctx;
-		ctx.save();
-		ctx.translate((-1 * this.position[0]), (-1 * this.position[1]));
-		ctx.drawImage(svgCircle, 0, 0);
+        ctx.save();
+        ctx.translate((this.position[0]), (this.position[1]));
+        ctx.beginPath();
+        ctx.fillStyle = "#ffffff";
+        ctx.arc(0, 0, 5, 0, 2 * Math.PI);
+        ctx.fill();
 		ctx.restore();
 	}
 }
@@ -140,5 +145,7 @@ kdca.addTaxiway(A1);
 kdca.drawTaxiways();
 
 ap1 = new Airplane(ctx, "B737", "B737", [100, 100]);
-ap1.speed = 20;
+ap1.speed = 1;
 ap1.heading = 100;
+
+setInterval(drawCanvas, 20);

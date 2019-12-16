@@ -8,22 +8,25 @@ drawCanvas = () => {
     ctx.clearRect(0, 0, width, height);
 	kdca.drawTaxiways();
 	ap1.updatePosition();
-	ap1.drawAirplane();
+    ap1.drawAirplane();
+    ap2.updatePosition();
+    ap2.drawAirplane();
 }
 
 class Airplane {
-	constructor(ctx, name, icao, position) {
+	constructor(ctx, name, icao, callsign, position) {
 		this.ctx = ctx;
 		this.name = name;
-		this.icao = icao;
+        this.icao = icao;
+        this.callsign = callsign;
 		this.position = position;
 		this.speed = 0;
 		this.heading = 0;
 		this.turn = 0;
 	}
 	updatePosition() {
-		let nPosX = this.position[0] + this.speed * Math.cos(-1 * ((Math.PI / 180) * this.heading) + (Math.PI / 2));
-		let nPosY = this.position[1] - this.speed * Math.sin(-1 * ((Math.PI / 180) * this.heading) + (Math.PI / 2));
+		let nPosX = this.position[0] + (this.speed * Math.cos(-1 * ((Math.PI / 180) * this.heading) + (Math.PI / 2)) / 20);
+		let nPosY = this.position[1] - (this.speed * Math.sin(-1 * ((Math.PI / 180) * this.heading) + (Math.PI / 2)) / 20);
 		this.position = [nPosX, nPosY];
 	}
 	drawAirplane() {
@@ -34,7 +37,44 @@ class Airplane {
         ctx.fillStyle = "#ffffff";
         ctx.arc(0, 0, 5, 0, 2 * Math.PI);
         ctx.fill();
-		ctx.restore();
+        ctx.restore();
+        ctx.translate(this.position[0], this.position[1]);
+        ctx.rotate((Math.PI / 180) * (180 + this.heading));
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, (3 * this.speed));
+        ctx.stroke();
+        ctx.restore();
+        ctx.save();
+        ctx.translate(this.position[0], this.position[1]);
+        ctx.beginPath();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.moveTo(0, -6);
+        ctx.lineTo(0, -11);
+        ctx.stroke();
+        ctx.restore();
+        ctx.save();
+        ctx.font = "5px Arial";
+        let boxWidth = 0;
+        let topText = this.callsign.toUpperCase() + " " +  this.icao.toUpperCase();
+        let topLen = ctx.measureText(topText).width;
+        let bottomText = toString(this.speed) + " " + toString(this.heading);
+        let bottomLen = ctx.measureText(bottomText).width + 2;
+        let boxHeight = ctx.measureText(bottomText).height + 2 + ctx.measureText(topText).height + 2;
+        if (topLen >= bottomLen) {
+            boxWidth = topLen + 6;
+        }
+        else {
+            boxWidth = bottomLen + 6;
+        }
+        ctx.translate(this.position[0], this.position[1]);
+        ctx.beginPath();
+        ctx.fillStyle = "#ffffff";
+        ctx.rect((-1 * (boxWidth / 2)), -12, boxWidth, (-1 * boxHeight));
+        ctx.fill();
+        ctx.restore();
 	}
 }
 
@@ -144,8 +184,12 @@ A1.addSegment([400, 400], [400, 100], true);
 kdca.addTaxiway(A1);
 kdca.drawTaxiways();
 
-ap1 = new Airplane(ctx, "B737", "B737", [100, 100]);
-ap1.speed = 1;
+ap1 = new Airplane(ctx, "B737", "B737", "AAL123", [100, 100]);
+ap1.speed = 20;
 ap1.heading = 100;
+
+ap2 = new Airplane(ctx, "B737", "B737", "SWA123", [100, 2000]);
+ap2.speed = 15;
+ap2.heading = 45;
 
 setInterval(drawCanvas, 20);

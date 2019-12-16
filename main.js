@@ -8,8 +8,8 @@ drawCanvas = () => {
     ctx.clearRect(0, 0, width, height);
 	kdca.drawTaxiways();
 	ap1.updatePosition();
-    ap1.drawAirplane();
     ap2.updatePosition();
+    ap1.drawAirplane();
     ap2.drawAirplane();
 }
 
@@ -37,8 +37,6 @@ class Airplane {
         ctx.fillStyle = "#ffffff";
         ctx.arc(0, 0, 5, 0, 2 * Math.PI);
         ctx.fill();
-        ctx.restore();
-        ctx.translate(this.position[0], this.position[1]);
         ctx.rotate((Math.PI / 180) * (180 + this.heading));
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 2;
@@ -188,7 +186,7 @@ ap1 = new Airplane(ctx, "B737", "B737", "AAL123", [100, 100]);
 ap1.speed = 20;
 ap1.heading = 100;
 
-ap2 = new Airplane(ctx, "B737", "B737", "SWA123", [100, 2000]);
+ap2 = new Airplane(ctx, "B737", "B737", "SWA123", [100, 200]);
 ap2.speed = 15;
 ap2.heading = 45;
 

@@ -1,6 +1,119 @@
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
-var taxiwayMatColor = "rgba(18, 18, 106, 1)"
+var width = canvas.width;
+var height = canvas.height;
+var taxiwayMatColor = "rgba(18, 18, 106, 1)";
+
+drawCanvas = () => {
+    ctx.clearRect(0, 0, width, height);
+	kdca.drawTaxiways();
+	ap1.updatePosition();
+    ap2.updatePosition();
+    ap1.drawAirplane();
+    ap2.drawAirplane();
+}
+
+class Airplane {
+	constructor(ctx, name, icao, callsign, position, turnRate, brakingAction, acceleration) {
+		this.ctx = ctx;
+		this.name = name;
+        this.icao = icao;
+        this.callsign = callsign;
+		this.position = position;
+		this.speed = 0;
+		this.heading = 0;
+        this.turn = 0;
+        this.scratchpad = 0;
+        this.turnRate = turnRate;
+        this.brakingAction = brakingAction;
+        this.acceleration = acceleration;
+        this.isBraking = false;
+        this.isAccelerating = false;
+        this.targetSpeed = this.speed;
+        this.targetHeading = 0;
+        this.onPushback = false;
+	}
+	updatePosition() {
+        this.updateSpeed();
+        this.updateHeading();
+		let nPosX = this.position[0] + (this.speed * Math.cos(-1 * ((Math.PI / 180) * this.heading) + (Math.PI / 2)) / 20);
+		let nPosY = this.position[1] - (this.speed * Math.sin(-1 * ((Math.PI / 180) * this.heading) + (Math.PI / 2)) / 20);
+        this.position = [nPosX, nPosY];
+	}
+	drawAirplane() {
+		var ctx = this.ctx;
+        ctx.save();
+        ctx.translate((this.position[0]), (this.position[1]));
+        ctx.beginPath();
+        ctx.fillStyle = "#ffffff";
+        ctx.arc(0, 0, 5, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.rotate((Math.PI / 180) * (180 + this.heading));
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, (3 * this.speed));
+        ctx.stroke();
+        ctx.restore();
+        ctx.save();
+        ctx.translate(this.position[0], this.position[1]);
+        ctx.beginPath();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.moveTo(0, -6);
+        ctx.lineTo(0, -11);
+        ctx.stroke();
+        ctx.restore();
+        ctx.save();
+        let topText = this.callsign.toUpperCase() + " " +  this.icao.toUpperCase();
+        let bottomText = parseInt(this.speed) + " " + parseInt(this.heading) + " " + this.scratchpad;
+        ctx.translate(this.position[0], this.position[1]);
+        ctx.beginPath();
+        ctx.textAlign = "center";
+        ctx.font = "10px arial";
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText(topText, 0, -25);
+        ctx.fillText(bottomText, 0, -13);
+        ctx.fill();
+        ctx.restore();
+    }
+    updateSpeed() {
+        if (this.onPushback == false) {
+            if (this.targetSpeed == 0 && this.speed > 0) {
+                this.speed += (this.brakingAction / 50);
+                if (this.speed < 0) {
+                    this.speed = 0;
+                }
+            }
+            else if (this.speed > this.targetSpeed) {
+                this.speed += (this.brakingAction / 50);
+                if (this.speed < this.targetSpeed) {
+                    this.speed = this.targetSpeed;
+                }
+            }
+            else if (this.speed < this.targetSpeed) {
+                this.speed += (this.acceleration / 50);
+                if (this.speed > this.targetSpeed) {
+                    this.speed = this.targetSpeed;
+                }
+            }
+        }
+    }
+    updateHeading() {
+        if (this.heading < this.targetHeading) {
+            this.heading += (this.turnRate / 20);
+            if (this.heading > this.targetHeading) {
+                this.heading = this.targetHeading;
+            }
+        }
+        if (this.heading > this.targetHeading) {
+            this.heading -= (this.turnRate / 20);
+            if (this.heading < this.targetHeading) {
+                this.heading = this.targetHeading;
+            }
+        }
+    }
+}
 
 class Airport {
 	constructor(ctx, icao) {
@@ -103,6 +216,13 @@ class Segment {
 kdca = new Airport(ctx, "KDCA");
 A1 = new Taxiway("A1");
 A1.addSegment([100, 100], [100, 400], true);
-A1.addSegment([100, 400], [400, 400], true);
+A1.addSegment([100, 400], [400, 400], false);
+A1.addSegment([400, 400], [400, 100], true);
 kdca.addTaxiway(A1);
 kdca.drawTaxiways();
+
+ap1 = new Airplane(ctx, "B737", "B737", "AAL123", [100, 100], 5, -10, 5);
+
+ap2 = new Airplane(ctx, "B737", "B737", "SWA123", [100, 200], 5, -10, 5);
+
+setInterval(drawCanvas, 20);

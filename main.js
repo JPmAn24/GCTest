@@ -34,16 +34,8 @@ class Airplane {
         this.onPushback = false;
 	}
 	updatePosition() {
-        if (this.speed != 0) {
-            this.heading += this.turnRate;
-        }
-        if (this.heading == -1) {
-            this.heading = 359;
-        }
-        else if (this.heading == 361) {
-            this.heading = 1;
-        }
         this.updateSpeed();
+        this.updateHeading();
 		let nPosX = this.position[0] + (this.speed * Math.cos(-1 * ((Math.PI / 180) * this.heading) + (Math.PI / 2)) / 20);
 		let nPosY = this.position[1] - (this.speed * Math.sin(-1 * ((Math.PI / 180) * this.heading) + (Math.PI / 2)) / 20);
         this.position = [nPosX, nPosY];
@@ -74,7 +66,7 @@ class Airplane {
         ctx.restore();
         ctx.save();
         let topText = this.callsign.toUpperCase() + " " +  this.icao.toUpperCase();
-        let bottomText = this.speed + " " + this.heading + " " + this.scratchpad;
+        let bottomText = parseInt(this.speed) + " " + parseInt(this.heading) + " " + this.scratchpad;
         ctx.translate(this.position[0], this.position[1]);
         ctx.beginPath();
         ctx.textAlign = "center";
@@ -108,12 +100,16 @@ class Airplane {
         }
     }
     updateHeading() {
-        if (this.speed != 0) {
+        if (this.heading < this.targetHeading) {
+            this.heading += (this.turnRate / 20);
+            if (this.heading > this.targetHeading) {
+                this.heading = this.targetHeading;
+            }
+        }
+        if (this.heading > this.targetHeading) {
+            this.heading -= (this.turnRate / 20);
             if (this.heading < this.targetHeading) {
-                this.heading += (this.turnRate / 20);
-                if (this.heading > this.targetHeading) {
-                    this.heading = this.targetHeading;
-                }
+                this.heading = this.targetHeading;
             }
         }
     }
@@ -225,8 +221,8 @@ A1.addSegment([400, 400], [400, 100], true);
 kdca.addTaxiway(A1);
 kdca.drawTaxiways();
 
-ap1 = new Airplane(ctx, "B737", "B737", "AAL123", [100, 100], 0, -10, 5);
+ap1 = new Airplane(ctx, "B737", "B737", "AAL123", [100, 100], 5, -10, 5);
 
-ap2 = new Airplane(ctx, "B737", "B737", "SWA123", [100, 200], 0, -10, 5);
+ap2 = new Airplane(ctx, "B737", "B737", "SWA123", [100, 200], 5, -10, 5);
 
 setInterval(drawCanvas, 20);

@@ -14,7 +14,7 @@ drawCanvas = () => {
 }
 
 class Airplane {
-	constructor(ctx, name, icao, callsign, position) {
+	constructor(ctx, name, icao, callsign, position, turnRate, brakingAction, acceleration) {
 		this.ctx = ctx;
 		this.name = name;
         this.icao = icao;
@@ -22,12 +22,31 @@ class Airplane {
 		this.position = position;
 		this.speed = 0;
 		this.heading = 0;
-		this.turn = 0;
+        this.turn = 0;
+        this.scratchpad = 0;
+        this.turnRate = turnRate;
+        this.brakingAction = brakingAction;
+        this.acceleration = acceleration;
+        this.isBraking = false;
+        this.isAccelerating = false;
+        this.targetSpeed = this.speed;
+        this.targetHeading = 0;
+        this.onPushback = false;
 	}
 	updatePosition() {
+        if (this.speed != 0) {
+            this.heading += this.turnRate;
+        }
+        if (this.heading == -1) {
+            this.heading = 359;
+        }
+        else if (this.heading == 361) {
+            this.heading = 1;
+        }
+        this.updateSpeed();
 		let nPosX = this.position[0] + (this.speed * Math.cos(-1 * ((Math.PI / 180) * this.heading) + (Math.PI / 2)) / 20);
 		let nPosY = this.position[1] - (this.speed * Math.sin(-1 * ((Math.PI / 180) * this.heading) + (Math.PI / 2)) / 20);
-		this.position = [nPosX, nPosY];
+        this.position = [nPosX, nPosY];
 	}
 	drawAirplane() {
 		var ctx = this.ctx;
@@ -54,26 +73,50 @@ class Airplane {
         ctx.stroke();
         ctx.restore();
         ctx.save();
-        ctx.font = "5px Arial";
-        let boxWidth = 0;
         let topText = this.callsign.toUpperCase() + " " +  this.icao.toUpperCase();
-        let topLen = ctx.measureText(topText).width;
-        let bottomText = toString(this.speed) + " " + toString(this.heading);
-        let bottomLen = ctx.measureText(bottomText).width + 2;
-        let boxHeight = ctx.measureText(bottomText).height + 2 + ctx.measureText(topText).height + 2;
-        if (topLen >= bottomLen) {
-            boxWidth = topLen + 6;
-        }
-        else {
-            boxWidth = bottomLen + 6;
-        }
+        let bottomText = this.speed + " " + this.heading + " " + this.scratchpad;
         ctx.translate(this.position[0], this.position[1]);
         ctx.beginPath();
+        ctx.textAlign = "center";
+        ctx.font = "10px arial";
         ctx.fillStyle = "#ffffff";
-        ctx.rect((-1 * (boxWidth / 2)), -12, boxWidth, (-1 * boxHeight));
+        ctx.fillText(topText, 0, -25);
+        ctx.fillText(bottomText, 0, -13);
         ctx.fill();
         ctx.restore();
-	}
+    }
+    updateSpeed() {
+        if (this.onPushback == false) {
+            if (this.targetSpeed == 0 && this.speed > 0) {
+                this.speed += (this.brakingAction / 50);
+                if (this.speed < 0) {
+                    this.speed = 0;
+                }
+            }
+            else if (this.speed > this.targetSpeed) {
+                this.speed += (this.brakingAction / 50);
+                if (this.speed < this.targetSpeed) {
+                    this.speed = this.targetSpeed;
+                }
+            }
+            else if (this.speed < this.targetSpeed) {
+                this.speed += (this.acceleration / 50);
+                if (this.speed > this.targetSpeed) {
+                    this.speed = this.targetSpeed;
+                }
+            }
+        }
+    }
+    updateHeading() {
+        if (this.speed != 0) {
+            if (this.heading < this.targetHeading) {
+                this.heading += (this.turnRate / 20);
+                if (this.heading > this.targetHeading) {
+                    this.heading = this.targetHeading;
+                }
+            }
+        }
+    }
 }
 
 class Airport {
@@ -182,12 +225,8 @@ A1.addSegment([400, 400], [400, 100], true);
 kdca.addTaxiway(A1);
 kdca.drawTaxiways();
 
-ap1 = new Airplane(ctx, "B737", "B737", "AAL123", [100, 100]);
-ap1.speed = 20;
-ap1.heading = 100;
+ap1 = new Airplane(ctx, "B737", "B737", "AAL123", [100, 100], 0, -10, 5);
 
-ap2 = new Airplane(ctx, "B737", "B737", "SWA123", [100, 200]);
-ap2.speed = 15;
-ap2.heading = 45;
+ap2 = new Airplane(ctx, "B737", "B737", "SWA123", [100, 200], 0, -10, 5);
 
 setInterval(drawCanvas, 20);

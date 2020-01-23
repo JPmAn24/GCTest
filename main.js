@@ -6,7 +6,7 @@ var taxiwayMatColor = "rgba(18, 18, 106, 1)";
 
 drawCanvas = () => {
     ctx.clearRect(0, 0, width, height);
-	kdca.drawTaxiways();
+	kdca.drawAirport();
 	ap1.updatePosition();
     ap2.updatePosition();
     ap1.drawAirplane();
@@ -100,16 +100,18 @@ class Airplane {
         }
     }
     updateHeading() {
-        if (this.heading < this.targetHeading) {
-            this.heading += (this.turnRate / 20);
-            if (this.heading > this.targetHeading) {
-                this.heading = this.targetHeading;
-            }
-        }
-        if (this.heading > this.targetHeading) {
-            this.heading -= (this.turnRate / 20);
+        if (this.speed > 0) {
             if (this.heading < this.targetHeading) {
-                this.heading = this.targetHeading;
+                this.heading += (this.turnRate / 20);
+                if (this.heading > this.targetHeading) {
+                    this.heading = this.targetHeading;
+                }
+            }
+            if (this.heading > this.targetHeading) {
+                this.heading -= (this.turnRate / 20);
+                if (this.heading < this.targetHeading) {
+                    this.heading = this.targetHeading;
+                }
             }
         }
     }
@@ -121,6 +123,8 @@ class Airport {
         this.icao = icao;
         var taxiways = [];
         this.taxiways = taxiways;
+        var runways = [];
+        this.runways = runways;
     }
     addTaxiway(taxiway) {
         var len = this.taxiways.length;
@@ -190,6 +194,57 @@ class Airport {
             }
         }
     }
+    addRunway(runway) {
+        var len = this.runways.length;
+        this.runways[len] = runway;
+    }
+    drawRunways() {
+        let ctx = this.ctx;
+        let len = this.runways.length;
+        ctx.beginPath();
+        ctx.strokeStyle = "#a0a0a0";
+        ctx.lineWidth = 50;
+        for (let i = 0; i < len; i++) {
+            ctx.moveTo(this.runways[i].segment.sPos[0], this.runways[i].segment.sPos[1]);
+            ctx.lineTo(this.runways[i].segment.ePos[0], this.runways[i].segment.ePos[1]);
+        }
+        ctx.stroke();
+        for (let i = 0; i < len; i++) {
+            let posX = this.runways[i].segment.sPos[0];
+            let posY = this.runways[i].segment.sPos[1];
+            let dX = this.runways[i].segment.ePos[0] - this.runways[i].segment.sPos[0];
+            let dY = this.runways[i].segment.ePos[1] - this.runways[i].segment.sPos[1];
+            let rot = Math.atan(dY/dX);
+            rot += (Math.PI / 2);
+            ctx.save();
+            ctx.translate(posX, posY);
+            ctx.rotate(rot);
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "17px arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.translate(0, -14);
+            ctx.fillText(this.runways[i].names[0], 0, 0);
+            ctx.restore();
+            posX = this.runways[i].segment.ePos[0];
+            posY = this.runways[i].segment.ePos[1];
+            rot *= -1;
+            ctx.save();
+            ctx.translate(posX, posY);
+            ctx.rotate(rot);
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "17px arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.translate(0, -14);
+            ctx.fillText(this.runways[i].names[1], 0, 0);
+            ctx.restore();
+        }
+    }
+    drawAirport() {
+        this.drawTaxiways();
+        this.drawRunways();
+    }
 }
 
 class Taxiway {
@@ -205,6 +260,13 @@ class Taxiway {
     }
 }
 
+class Runway {
+    constructor(names, segment) {
+        this.names = names
+        this.segment = segment;
+    }
+}
+
 class Segment {
     constructor(sPos, ePos, label) {
         this.sPos = sPos;
@@ -214,15 +276,17 @@ class Segment {
 }
 
 kdca = new Airport(ctx, "KDCA");
-A1 = new Taxiway("A1");
+let r1s = new Segment([100, 100], [400, 100], true);
+let r1 = new Runway(["9", "27"], r1s);
+kdca.addRunway(r1);
+let A1 = new Taxiway("A1");
 A1.addSegment([100, 100], [100, 400], true);
 A1.addSegment([100, 400], [400, 400], false);
 A1.addSegment([400, 400], [400, 100], true);
 kdca.addTaxiway(A1);
-kdca.drawTaxiways();
 
-ap1 = new Airplane(ctx, "B737", "B737", "AAL123", [100, 100], 5, -10, 5);
+let ap1 = new Airplane(ctx, "B737", "B737", "AAL123", [100, 100], 5, -10, 5);
 
-ap2 = new Airplane(ctx, "B737", "B737", "SWA123", [100, 200], 5, -10, 5);
+let ap2 = new Airplane(ctx, "B737", "B737", "SWA123", [100, 200], 5, -10, 5);
 
 setInterval(drawCanvas, 20);

@@ -6,7 +6,7 @@ var taxiwayMatColor = "rgba(18, 18, 106, 1)";
 
 drawCanvas = () => {
     ctx.canvas.width = window.innerWidth;
-    ctx.canvas.height = window.innerHeight;
+    ctx.canvas.height = window.innerHeight - 20;
     ctx.clearRect(0, 0, width, height);
 	kdca.drawAirport();
 	ap1.updatePosition();
@@ -138,6 +138,8 @@ class Airport {
     	var ctx = this.ctx
         var len = this.taxiways.length;
         ctx.save();
+        let oLC = ctx.lineCap;
+        ctx.lineCap = "round";
         ctx.beginPath();
         ctx.strokeStyle = taxiwayMatColor;
         ctx.lineWidth = 40;
@@ -197,6 +199,7 @@ class Airport {
                 }
             }
         }
+        ctx.lineCap = oLC;
     }
     addRunway(runway) {
         var len = this.runways.length;
@@ -309,6 +312,12 @@ class Terminal {
     }
 }
 
+class Gate {
+    constructor(apos) {
+        this.apos = apos;
+    }
+}
+
 kdca = new Airport(ctx, "KDCA");
 let r1s = new Segment([100, 100], [400, 100], true);
 let r1 = new Runway(["9", "27"], r1s);
@@ -321,6 +330,9 @@ kdca.addTaxiway(A1);
 t1 = new Terminal();
 t1.poly = [[200, 200], [300, 200], [300, 300], [200, 300]];
 kdca.addTerminal(t1);
+ramp1 = new Taxiway("ramp1");
+ramp1.addSegment([100, 250], [190, 250], false);
+kdca.addTaxiway(ramp1);
 
 let ap1 = new Airplane(ctx, "B737", "B737", "AAL123", [100, 100], 5, -10, 5);
 

@@ -5,6 +5,8 @@ var height = canvas.height;
 var taxiwayMatColor = "rgba(18, 18, 106, 1)";
 
 drawCanvas = () => {
+    ctx.canvas.width = window.innerWidth;
+    ctx.canvas.height = window.innerHeight;
     ctx.clearRect(0, 0, width, height);
 	kdca.drawAirport();
 	ap1.updatePosition();
@@ -125,6 +127,8 @@ class Airport {
         this.taxiways = taxiways;
         var runways = [];
         this.runways = runways;
+        var terminals = [];
+        this.terminals = terminals;
     }
     addTaxiway(taxiway) {
         var len = this.taxiways.length;
@@ -241,9 +245,29 @@ class Airport {
             ctx.restore();
         }
     }
+    addTerminal(terminal) {
+        var len = this.terminals.length;
+        this.terminals[len] = terminal;
+    }
+    drawTerminals() {
+        let ctx = this.ctx;
+        let len = this.terminals.length;
+        for (let i = 0; i < len; i++) {
+            let len1 = this.terminals[i].poly.length;
+            ctx.fillStyle = "#2a2a2a";
+            ctx.beginPath();
+            ctx.moveTo(this.terminals[i].poly[0][0], this.terminals[i].poly[0][1]);
+            for (let j = 1; j < len1; j++) {
+                ctx.lineTo(this.terminals[i].poly[j][0], this.terminals[i].poly[j][1]);
+            }
+            ctx.closePath();
+            ctx.fill();
+        }
+    }
     drawAirport() {
         this.drawTaxiways();
         this.drawRunways();
+        this.drawTerminals();
     }
 }
 
@@ -275,6 +299,16 @@ class Segment {
     }
 }
 
+class Terminal {
+    constructor() {
+        this.poly = [];
+    }
+    addPoint(pos) {
+        var len = this.poly.length;
+        this.poly[len] = pos;
+    }
+}
+
 kdca = new Airport(ctx, "KDCA");
 let r1s = new Segment([100, 100], [400, 100], true);
 let r1 = new Runway(["9", "27"], r1s);
@@ -284,6 +318,9 @@ A1.addSegment([100, 100], [100, 400], true);
 A1.addSegment([100, 400], [400, 400], false);
 A1.addSegment([400, 400], [400, 100], true);
 kdca.addTaxiway(A1);
+t1 = new Terminal();
+t1.poly = [[200, 200], [300, 200], [300, 300], [200, 300]];
+kdca.addTerminal(t1);
 
 let ap1 = new Airplane(ctx, "B737", "B737", "AAL123", [100, 100], 5, -10, 5);
 

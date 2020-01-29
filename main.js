@@ -36,7 +36,7 @@ class Airplane {
         this.useableGates = useableGates;
         this.needsToSpawn = true;
         this.gateOccupied = false;
-        this.position = [0, 0];
+        this.position = null;
 	}
 	updatePosition() {
         if (this.needsToSpawn) {
@@ -72,41 +72,46 @@ class Airplane {
         }
 	}
 	drawAirplane() {
-		var ctx = this.ctx;
-        ctx.save();
-        ctx.translate((this.position[0]), (this.position[1]));
-        ctx.beginPath();
-        ctx.fillStyle = "#ffffff";
-        ctx.arc(0, 0, 5, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.rotate((Math.PI / 180) * (180 + this.heading));
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 2;
-        ctx.moveTo(0, 0);
-        ctx.lineTo(0, (3 * this.speed));
-        ctx.stroke();
-        ctx.restore();
-        ctx.save();
-        ctx.translate(this.position[0], this.position[1]);
-        ctx.beginPath();
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 2;
-        ctx.moveTo(0, -6);
-        ctx.lineTo(0, -11);
-        ctx.stroke();
-        ctx.restore();
-        ctx.save();
-        let topText = this.callsign.toUpperCase() + " " +  this.icao.toUpperCase();
-        let bottomText = parseInt(this.speed) + " " + parseInt(this.heading) + " " + this.scratchpad;
-        ctx.translate(this.position[0], this.position[1]);
-        ctx.beginPath();
-        ctx.textAlign = "center";
-        ctx.font = "10px arial";
-        ctx.fillStyle = "#ffffff";
-        ctx.fillText(topText, 0, -25);
-        ctx.fillText(bottomText, 0, -13);
-        ctx.fill();
-        ctx.restore();
+        if (this.position != null) {
+            var ctx = this.ctx;
+            ctx.save();
+            ctx.translate((this.position[0]), (this.position[1]));
+            ctx.beginPath();
+            ctx.fillStyle = "#ffffff";
+            ctx.arc(0, 0, 5, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.rotate((Math.PI / 180) * (180 + this.heading));
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 2;
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, (3 * this.speed));
+            ctx.stroke();
+            ctx.restore();
+            ctx.save();
+            ctx.translate(this.position[0], this.position[1]);
+            ctx.beginPath();
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 2;
+            ctx.moveTo(0, -6);
+            ctx.lineTo(0, -11);
+            ctx.stroke();
+            ctx.restore();
+            ctx.save();
+            let topText = this.callsign.toUpperCase() + " " +  this.icao.toUpperCase();
+            let bottomText = parseInt(this.speed) + " " + parseInt(this.heading) + " " + this.scratchpad;
+            ctx.translate(this.position[0], this.position[1]);
+            ctx.beginPath();
+            ctx.textAlign = "center";
+            ctx.font = "10px arial";
+            ctx.fillStyle = "#ffffff";
+            ctx.fillText(topText, 0, -25);
+            ctx.fillText(bottomText, 0, -13);
+            ctx.fill();
+            ctx.restore();
+        }
+        else {
+            return
+        }
     }
     updateSpeed() {
         if (this.onPushback == false) {

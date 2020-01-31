@@ -1,10 +1,16 @@
 var canvas = document.getElementById("canvas");
+var inputContainer = document.getElementById("inputContainer");
+var consoleBar = document.getElementById("consoleBar");
 var ctx = canvas.getContext("2d");
 var width = canvas.width;
 var height = canvas.height;
 var taxiwayMatColor = "rgba(18, 18, 106, 1)";
 
 drawCanvas = () => {
+    inputContainer.width = window.innerWidth;
+    inputContainer.height = 20;
+    consoleBar.width = window.innerWidth - 10;
+    consoleBar.height = 15;
     ctx.canvas.width = window.innerWidth;
     ctx.canvas.height = window.innerHeight - 20;
     ctx.clearRect(0, 0, width, height);

@@ -6,7 +6,7 @@
   background-color: rgba(64, 64, 64, 1);
 }
 
-#commandBar {
+.commandBar {
   background-color: rgba(0, 0, 0, 0);
   color: rgba(192, 192, 192, 1);
 }

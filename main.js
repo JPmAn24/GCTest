@@ -4,7 +4,7 @@ var width = canvas.width;
 var height = canvas.height;
 var taxiwayMatColor = "rgba(18, 18, 106, 1)";
 
-drawCanvas = () => {
+function drawCanvas() {
     ctx.canvas.width = window.innerWidth;
     ctx.canvas.height = window.innerHeight - 20;
     ctx.clearRect(0, 0, width, height);
@@ -21,8 +21,8 @@ class Airplane {
 		this.name = name;
         this.icao = icao;
         this.callsign = callsign;
-		this.speed = 0;
-		this.heading = 0;
+        this.speed = 0;
+        this.heading = 0;
         this.turn = 0;
         this.scratchpad = 0;
         this.turnRate = turnRate;
@@ -33,11 +33,24 @@ class Airplane {
         this.targetSpeed = this.speed;
         this.targetHeading = 0;
         this.onPushback = false;
+        this.hasPushedBack = false;
         this.useableGates = useableGates;
         this.needsToSpawn = true;
         this.gateOccupied = false;
         this.position = null;
-	}
+        this.pushbackPath = null;
+        this.pushbackProgress = null;
+    }
+    beginPushback(name) {
+        for (let i = 0; i < this.gateOccupied.paths.length; i++) {
+            if (this.gateOccupied.paths[i].name == name) {
+                this.pushbackPath = this.gateOccupied.paths[i];
+                this.onPushback = true;
+                this.pushbackProgress = 0;
+                return;
+            }
+        }
+    }
 	updatePosition() {
         if (this.needsToSpawn) {
             for (let i = 0; i < gateCollection.length; i++) {
@@ -46,8 +59,10 @@ class Airplane {
                     for (let j = 0; j < this.useableGates.length; j++) {
                         if (gate.name == this.useableGates[j]) {
                             this.position = gate.apos;
+                            console.log(gate.apos);
                             gate.occupied = true;
-                            this.gateOccupied = gate.name;
+                            this.gateOccupiedN = gate.name;
+                            this.gateOccupied = gate;
                             this.needsToSpawn = false;
                         }
                     }
@@ -55,23 +70,48 @@ class Airplane {
             }
         }
         else {
-            if (this.speed == 0 && this.targetSpeed == 0) {
-                return
-            }
-            for (let i = 0; i < gateCollection.length; i++) {
-                if (gateCollection[i].name == this.gateOccupied) {
-                    gateCollection[i].occupied = false;
+            if (!this.onPushback) {
+                if (this.speed == 0 && this.targetSpeed == 0) {
+                    return
                 }
+                for (let i = 0; i < gateCollection.length; i++) {
+                    if (gateCollection[i].name == this.gateOccupiedN) {
+                        gateCollection[i].occupied = false;
+                    }
+                }
+                this.gateOccupiedN = false;
+                this.updateSpeed();
+                this.updateHeading();
+                let nPosX = this.position[0] + (this.speed * Math.cos(-1 * ((Math.PI / 180) * this.heading) + (Math.PI / 2)) / 20);
+                let nPosY = this.position[1] - (this.speed * Math.sin(-1 * ((Math.PI / 180) * this.heading) + (Math.PI / 2)) / 20);
+                this.position = [nPosX, nPosY];
             }
-            this.gateOccupied = false;
-            this.updateSpeed();
-            this.updateHeading();
-            let nPosX = this.position[0] + (this.speed * Math.cos(-1 * ((Math.PI / 180) * this.heading) + (Math.PI / 2)) / 20);
-            let nPosY = this.position[1] - (this.speed * Math.sin(-1 * ((Math.PI / 180) * this.heading) + (Math.PI / 2)) / 20);
-            this.position = [nPosX, nPosY];
+            else {
+                this.doPushback();
+            }
         }
-	}
-	drawAirplane() {
+    }
+    doPushback() {
+        if (this.pushbackProgress == this.pushbackPath.path.length) {
+            this.onPushback = false;
+            this.heading = this.pushbackPath.endHeading;
+            this.gateOccupied.occupied = false;
+            return;
+        }
+        let dx = this.position[0] - this.pushbackPath.path[this.pushbackProgress][0];
+        let dy = this.position[1] - this.pushbackPath.path[this.pushbackProgress][1];
+        let distanceToNext = Math.sqrt((Math.abs(dx)**2) + (Math.abs(dy)**2));
+        let headingToNext = Math.atan(dy/dx);
+        if (Math.abs(distanceToNext) <= 1) {
+            this.position = this.pushbackPath.path[this.pushbackProgress];
+            this.pushbackProgress += 1;
+        }
+        else {
+            this.position[0] -= (0.25 * Math.cos(headingToNext));
+            this.position[1] -= (0.25 * Math.sin(headingToNext));
+        }
+    }
+    drawAirplane() {
         if (this.position != null) {
             var ctx = this.ctx;
             ctx.save();
@@ -154,8 +194,8 @@ class Airplane {
 }
 
 class Airport {
-	constructor(ctx, icao) {
-    	this.ctx = ctx;
+    constructor(ctx, icao) {
+        this.ctx = ctx;
         this.icao = icao;
         var taxiways = [];
         this.taxiways = taxiways;
@@ -169,7 +209,7 @@ class Airport {
         this.taxiways[len] = taxiway;
     }
     drawTaxiways() {
-    	var ctx = this.ctx
+        var ctx = this.ctx
         var len = this.taxiways.length;
         ctx.save();
         let oLC = ctx.lineCap;
@@ -355,6 +395,27 @@ class Gate {
         var len = gateCollection.length;
         gateCollection[len] = this;
         this.occupied = false;
+        this.paths = [];
+    }
+    addPath(name) {
+        let len = this.paths.length;
+        let path = new PushbackPath(name);
+        this.paths[len] = path;
+    }
+}
+
+class PushbackPath {
+    constructor(name) {
+        this.name = name;
+        this.path = [];
+        this.endHeading = 0;
+    }
+    addPoint(point) {
+        let len = this.path.length;
+        this.path[len] = point;
+    }
+    addEndHeading(heading) {
+        this.endHeading = heading;
     }
 }
 
@@ -374,6 +435,14 @@ ramp1 = new Taxiway("ramp1");
 ramp1.addSegment([100, 250], [190, 250], false);
 kdca.addTaxiway(ramp1);
 g1 = new Gate([190, 250], "G1");
+g1.addPath("L");
+g1.paths[0].addPoint([100, 250]);
+g1.paths[0].addPoint([100, 100]);
+g1.paths[0].addEndHeading(180);
+g1.addPath("R");
+g1.paths[1].addPoint([100, 250]);
+g1.paths[1].addPoint([100, 400]);
+g1.paths[1].addEndHeading(0);
 
 let ap1 = new Airplane(ctx, "B737", "B737", "AAL123", 5, -10, 5, ["G1"]);
 

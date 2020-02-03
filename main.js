@@ -1,3 +1,4 @@
+"use strict";
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 var width = canvas.width;
@@ -8,17 +9,17 @@ function drawCanvas() {
     ctx.canvas.width = window.innerWidth;
     ctx.canvas.height = window.innerHeight - 20;
     ctx.clearRect(0, 0, width, height);
-	kdca.drawAirport();
-	ap1.updatePosition();
+    kdca.drawAirport();
+    ap1.updatePosition();
     ap2.updatePosition();
     ap1.drawAirplane();
     ap2.drawAirplane();
 }
 
 class Airplane {
-	constructor(ctx, name, icao, callsign, turnRate, brakingAction, acceleration, useableGates) {
-		this.ctx = ctx;
-		this.name = name;
+    constructor(ctx, name, icao, callsign, turnRate, brakingAction, acceleration, useableGates) {
+        this.ctx = ctx;
+        this.name = name;
         this.icao = icao;
         this.callsign = callsign;
         this.speed = 0;
@@ -105,6 +106,7 @@ class Airplane {
         if (Math.abs(distanceToNext) <= 1) {
             this.position = this.pushbackPath.path[this.pushbackProgress];
             this.pushbackProgress += 1;
+            return;
         }
         else {
             this.position[0] -= (0.25 * Math.cos(headingToNext));
@@ -112,46 +114,44 @@ class Airplane {
         }
     }
     drawAirplane() {
-        if (this.position != null) {
-            var ctx = this.ctx;
-            ctx.save();
-            ctx.translate((this.position[0]), (this.position[1]));
-            ctx.beginPath();
-            ctx.fillStyle = "#ffffff";
-            ctx.arc(0, 0, 5, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.rotate((Math.PI / 180) * (180 + this.heading));
-            ctx.strokeStyle = "#ffffff";
-            ctx.lineWidth = 2;
-            ctx.moveTo(0, 0);
-            ctx.lineTo(0, (3 * this.speed));
-            ctx.stroke();
-            ctx.restore();
-            ctx.save();
-            ctx.translate(this.position[0], this.position[1]);
-            ctx.beginPath();
-            ctx.strokeStyle = "#ffffff";
-            ctx.lineWidth = 2;
-            ctx.moveTo(0, -6);
-            ctx.lineTo(0, -11);
-            ctx.stroke();
-            ctx.restore();
-            ctx.save();
-            let topText = this.callsign.toUpperCase() + " " +  this.icao.toUpperCase();
-            let bottomText = parseInt(this.speed) + " " + parseInt(this.heading) + " " + this.scratchpad;
-            ctx.translate(this.position[0], this.position[1]);
-            ctx.beginPath();
-            ctx.textAlign = "center";
-            ctx.font = "10px arial";
-            ctx.fillStyle = "#ffffff";
-            ctx.fillText(topText, 0, -25);
-            ctx.fillText(bottomText, 0, -13);
-            ctx.fill();
-            ctx.restore();
+        if (this.position == null) {
+            return;
         }
-        else {
-            return
-        }
+        var ctx = this.ctx;
+        ctx.save();
+        ctx.translate((this.position[0]), (this.position[1]));
+        ctx.beginPath();
+        ctx.fillStyle = "#ffffff";
+        ctx.arc(0, 0, 5, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.rotate((Math.PI / 180) * (180 + this.heading));
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, (3 * this.speed));
+        ctx.stroke();
+        ctx.restore();
+        ctx.save();
+        ctx.translate(this.position[0], this.position[1]);
+        ctx.beginPath();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.moveTo(0, -6);
+        ctx.lineTo(0, -11);
+        ctx.stroke();
+        ctx.restore();
+        ctx.save();
+        let topText = this.callsign.toUpperCase() + " " +  this.icao.toUpperCase();
+        let bottomText = parseInt(this.speed) + " " + parseInt(this.heading) + " " + this.scratchpad;
+        ctx.translate(this.position[0], this.position[1]);
+        ctx.beginPath();
+        ctx.textAlign = "center";
+        ctx.font = "10px arial";
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText(topText, 0, -25);
+        ctx.fillText(bottomText, 0, -13);
+        ctx.fill();
+        ctx.restore();
     }
     updateSpeed() {
         if (this.onPushback == false) {

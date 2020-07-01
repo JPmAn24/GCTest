@@ -1,9 +1,24 @@
 "use strict";
 var canvas = document.getElementById("canvas");
+var inputContainer = document.getElementById("inputContainer");
+var consoleBar = document.getElementById("consoleBar");
 var ctx = canvas.getContext("2d");
 var width = canvas.width;
 var height = canvas.height;
 var taxiwayMatColor = "rgba(18, 18, 106, 1)";
+
+drawCanvas = () => {
+    inputContainer.width = window.innerWidth;
+    inputContainer.height = 20;
+    consoleBar.width = window.innerWidth - 10;
+    consoleBar.height = 15;
+    ctx.canvas.width = window.innerWidth;
+    ctx.canvas.height = window.innerHeight - 20;
+    ctx.clearRect(0, 0, width, height);
+	kdca.drawAirport();
+    airplaneCollection.updatePositions();
+    airplaneCollection.drawAircraft();
+}
 
 /**
  * class AirplaneCollection
@@ -144,7 +159,7 @@ class Airplane {
                 if (!gate.occupied) {
                     for (let j = 0; j < this.useableGates.length; j++) {
                         if (gate.name == this.useableGates[j]) {
-                            this.position = gate.apos;
+                            this.position = $.extend(true, {}, gate.apos);
                             console.log(gate.apos);
                             gate.occupied = true;
                             this.gateOccupiedN = gate.name;
@@ -189,7 +204,7 @@ class Airplane {
         let distanceToNext = Math.sqrt((Math.abs(dx)**2) + (Math.abs(dy)**2));
         let headingToNext = Math.atan(dy/dx);
         if (Math.abs(distanceToNext) <= 1) {
-            this.position = this.pushbackPath.path[this.pushbackProgress];
+            this.position = $.extend(true, {}, this.pushbackPath.path[this.pushbackProgress]);
             this.pushbackProgress += 1;
             return;
         }

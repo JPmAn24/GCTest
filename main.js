@@ -16,10 +16,9 @@ drawCanvas = () => {
     ctx.canvas.height = window.innerHeight - 20;
     ctx.clearRect(0, 0, width, height);
 	kdca.drawAirport();
-	ap1.updatePosition();
-    ap2.updatePosition();
-    ap1.drawAirplane();
-    ap2.drawAirplane();
+    airplaneCollection.updatePositions();
+    airplaneCollection.drawAircraft();
+}
 
 /**
  * class AirplaneCollection
@@ -160,7 +159,7 @@ class Airplane {
                 if (!gate.occupied) {
                     for (let j = 0; j < this.useableGates.length; j++) {
                         if (gate.name == this.useableGates[j]) {
-                            this.position = gate.apos;
+                            this.position = $.extend(true, {}, gate.apos);
                             console.log(gate.apos);
                             gate.occupied = true;
                             this.gateOccupiedN = gate.name;
@@ -205,7 +204,7 @@ class Airplane {
         let distanceToNext = Math.sqrt((Math.abs(dx)**2) + (Math.abs(dy)**2));
         let headingToNext = Math.atan(dy/dx);
         if (Math.abs(distanceToNext) <= 1) {
-            this.position = this.pushbackPath.path[this.pushbackProgress];
+            this.position = $.extend(true, {}, this.pushbackPath.path[this.pushbackProgress]);
             this.pushbackProgress += 1;
             return;
         }

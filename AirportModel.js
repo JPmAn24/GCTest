@@ -29,8 +29,6 @@ class Airport {
         this.icao = icao;
         var taxiways = [];
         this.taxiways = taxiways;
-        var runways = [];
-        this.runways = runways;
         var terminals = [];
         this.terminals = terminals;
     }
@@ -105,53 +103,6 @@ class Airport {
         }
         ctx.lineCap = oLC;
     }
-    addRunway(runway) {
-        var len = this.runways.length;
-        this.runways[len] = runway;
-    }
-    drawRunways() {
-        let ctx = this.ctx;
-        let len = this.runways.length;
-        ctx.beginPath();
-        ctx.strokeStyle = "#a0a0a0";
-        ctx.lineWidth = 50;
-        for (let i = 0; i < len; i++) {
-            ctx.moveTo(this.runways[i].segment.sPos[0], this.runways[i].segment.sPos[1]);
-            ctx.lineTo(this.runways[i].segment.ePos[0], this.runways[i].segment.ePos[1]);
-        }
-        ctx.stroke();
-        for (let i = 0; i < len; i++) {
-            let posX = this.runways[i].segment.sPos[0];
-            let posY = this.runways[i].segment.sPos[1];
-            let dX = this.runways[i].segment.ePos[0] - this.runways[i].segment.sPos[0];
-            let dY = this.runways[i].segment.ePos[1] - this.runways[i].segment.sPos[1];
-            let rot = Math.atan(dY/dX);
-            rot += (Math.PI / 2);
-            ctx.save();
-            ctx.translate(posX, posY);
-            ctx.rotate(rot);
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "17px arial";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.translate(0, -14);
-            ctx.fillText(this.runways[i].names[0], 0, 0);
-            ctx.restore();
-            posX = this.runways[i].segment.ePos[0];
-            posY = this.runways[i].segment.ePos[1];
-            rot *= -1;
-            ctx.save();
-            ctx.translate(posX, posY);
-            ctx.rotate(rot);
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "17px arial";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.translate(0, -14);
-            ctx.fillText(this.runways[i].names[1], 0, 0);
-            ctx.restore();
-        }
-    }
     addTerminal(terminal) {
         var len = this.terminals.length;
         this.terminals[len] = terminal;
@@ -173,7 +124,6 @@ class Airport {
     }
     drawAirport() {
         this.drawTaxiways();
-        this.drawRunways();
         this.drawTerminals();
     }
 }

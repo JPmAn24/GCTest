@@ -156,4 +156,11 @@ class Airplane {
             }
         }
     }
+    getBrakingDistance(tgtSpeed) {
+        let v0 = this.speed;
+        let v = 0;
+        let a = this.brakingAction * -1;
+        let x = ((v ** 2) - (v0 ** 2)) / (a / 2);
+        return x;
+    }
 }

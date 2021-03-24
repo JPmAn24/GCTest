@@ -9,5 +9,6 @@ class Runway {
     constructor(names, segment) {
         this.names = names
         this.segment = segment;
+        runwayCollection.add(this);
     }
 }

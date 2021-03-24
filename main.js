@@ -8,6 +8,7 @@ var height = canvas.height;
 var taxiwayMatColor = "rgba(18, 18, 106, 1)";
 
 let airplaneCollection = new AirplaneCollection(ctx);
+let runwayCollection = new RunwayCollection(ctx);
 
 let gateCollection = [];
 
@@ -19,7 +20,8 @@ function drawCanvas() {
     ctx.canvas.width = window.innerWidth;
     ctx.canvas.height = window.innerHeight - 20;
     ctx.clearRect(0, 0, width, height);
-	kdca.drawAirport();
+    kdca.drawAirport();
+    runwayCollection.drawRunways();
     airplaneCollection.updatePositions();
     airplaneCollection.drawAircraft();
 }
@@ -27,7 +29,6 @@ function drawCanvas() {
 let kdca = new Airport(ctx, "KDCA");
 let r1s = new Segment([100, 100], [400, 100], true);
 let r1 = new Runway(["9", "27"], r1s);
-kdca.addRunway(r1);
 let A1 = new Taxiway("A1");
 A1.addSegment([100, 100], [100, 400], true);
 A1.addSegment([100, 400], [400, 400], false);
